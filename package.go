@@ -2,8 +2,8 @@ package vectopsf64
 
 import (
 	"fmt"
-	fs "github.com/CaptainDyce/vectopsf64/f64supp"
-	is "github.com/CaptainDyce/vectopsf64/intsupp"
+	fs "github.com/CaptainDyce/f64supp"
+	is "github.com/CaptainDyce/intsupp"
 	"math"
 )
 
@@ -38,24 +38,15 @@ func OnInts(values []int) VectOp {
 ///////////////////////////
 
 func (s VectOp) Apply(f fs.IndexedFunc) VectOp {
-	for i, _ := range s {
-		s[i] = f(i)
-	}
-	return s
+	return fs.Apply(s, f)
 }
 
 func (s VectOp) ApplyOp(f fs.Operator) VectOp {
-	for i, val := range s {
-		s[i] = f(val)
-	}
-	return s
+	return fs.ApplyOp(s, f)
 }
 
 func (s VectOp) ApplyOpi(f fs.IndexedOperator) VectOp {
-	for i, val := range s {
-		s[i] = f(i, val)
-	}
-	return s
+	return fs.ApplyOpi(s, f)
 }
 
 func (s VectOp) Ident() VectOp {
@@ -63,37 +54,19 @@ func (s VectOp) Ident() VectOp {
 }
 
 func (s VectOp) Setl(value float64) VectOp {
-	for i, _ := range s {
-		s[i] = value
-	}
-	return s
+	return fs.Setl(s, value)
 }
 
 func (s VectOp) Setv(v []float64) VectOp {
-	s.accept(v)
-	for i, _ := range s {
-		s[i] = v[i]
-	}
-	return s
+	return fs.Setv(s, v)
 }
 
 func (s VectOp) SetMaskl(value float64, p is.Predicate) VectOp {
-	for i, _ := range s {
-		if p(i) {
-			s[i] = value
-		}
-	}
-	return s
+	return fs.SetMaskl(s, value, p)
 }
 
 func (s VectOp) SetMaskv(v []float64, p is.Predicate) VectOp {
-	s.accept(v)
-	for i, _ := range s {
-		if p(i) {
-			s[i] = v[i]
-		}
-	}
-	return s
+	return fs.SetMaskv(s, v, p)
 }
 
 func (s VectOp) accept(v []float64) {
@@ -107,23 +80,22 @@ func (s VectOp) accept(v []float64) {
 /////////////////
 // -> s'[i] = s[i] + v[i]
 func (s VectOp) Plusv(v []float64) VectOp {
-	s.accept(v)
-	return s.PlusOp(fs.Get(v))
+	return fs.Plusv(s, v)
 }
 
 // -> s'[i] = s[i] + value
 func (s VectOp) Plusl(value float64) VectOp {
-	return s.ApplyOp(func(val float64) float64 { return val + value })
+	return fs.Plusl(s, value)
 }
 
 // -> s'[i] = s[i] + o(i)
 func (s VectOp) PlusOp(o fs.IndexedFunc) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return val + o(i) })
+	return fs.PlusOp(s, o)
 }
 
 // -> s'[i] = s[i] + o(i, s[i])
 func (s VectOp) PlusOpi(o fs.IndexedOperator) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return val + o(i, val) })
+	return fs.PlusOpi(s, o)
 }
 
 /////////////////
@@ -131,23 +103,22 @@ func (s VectOp) PlusOpi(o fs.IndexedOperator) VectOp {
 /////////////////
 // -> s'[i] = s[i] - v[i]
 func (s VectOp) Minusv(v []float64) VectOp {
-	s.accept(v)
-	return s.MinusOp(fs.Get(v))
+	return fs.Minusv(s, v)
 }
 
 // -> s'[i] = s[i] - value
 func (s VectOp) Minusl(value float64) VectOp {
-	return s.ApplyOp(func(val float64) float64 { return val - value })
+	return fs.Minusl(s, value)
 }
 
 // -> s'[i] = s[i] + o(i)
 func (s VectOp) MinusOp(o fs.IndexedFunc) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return val - o(i) })
+	return fs.MinusOp(s, o)
 }
 
 // -> s'[i] = s[i] + o(i, s[i])
 func (s VectOp) MinusOpi(o fs.IndexedOperator) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return val - o(i, val) })
+	return fs.MinusOpi(s, o)
 }
 
 /////////////////
@@ -155,23 +126,22 @@ func (s VectOp) MinusOpi(o fs.IndexedOperator) VectOp {
 /////////////////
 // -> s'[i] = s[i] * v[i]
 func (s VectOp) Timesv(v []float64) VectOp {
-	s.accept(v)
-	return s.TimesOp(fs.Get(v))
+	return fs.Timesv(s, v)
 }
 
 // -> s'[i] = s[i] * value
 func (s VectOp) Timesl(value float64) VectOp {
-	return s.ApplyOp(func(val float64) float64 { return val * value })
+	return fs.Timesl(s, value)
 }
 
 // -> s'[i] = s[i] * o(i)
 func (s VectOp) TimesOp(o fs.IndexedFunc) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return val * o(i) })
+	return fs.TimesOp(s, o)
 }
 
 // -> s'[i] = s[i] * o(i, s[i])
 func (s VectOp) TimesOpi(o fs.IndexedOperator) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return val * o(i, val) })
+	return fs.TimesOpi(s, o)
 }
 
 /////////////////
@@ -179,23 +149,22 @@ func (s VectOp) TimesOpi(o fs.IndexedOperator) VectOp {
 /////////////////
 // -> s'[i] = s[i] / v[i]
 func (s VectOp) Divv(v []float64) VectOp {
-	s.accept(v)
-	return s.DivOp(fs.Get(v))
+	return fs.Divv(s, v)
 }
 
 // -> s'[i] = s[i] / value
 func (s VectOp) Divl(value float64) VectOp {
-	return s.ApplyOp(func(val float64) float64 { return val / value })
+	return fs.Divl(s, value)
 }
 
 // -> s'[i] = s[i] / o(i)
 func (s VectOp) DivOp(o fs.IndexedFunc) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return val / o(i) })
+	return fs.DivOp(s, o)
 }
 
 // -> s'[i] = s[i] / o(i, s[i])
 func (s VectOp) DivOpi(o fs.IndexedOperator) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return val / o(i, val) })
+	return fs.DivOpi(s, o)
 }
 
 /////////////////
@@ -203,23 +172,22 @@ func (s VectOp) DivOpi(o fs.IndexedOperator) VectOp {
 /////////////////
 // -> s'[i] = s[i] ^ v[i] (as in e.g. 2^3...)
 func (s VectOp) Powv(v []float64) VectOp {
-	s.accept(v)
-	return s.PowOp(fs.Get(v))
+	return fs.Powv(s, v)
 }
 
 // -> s'[i] = s[i] ^ value
 func (s VectOp) Powl(value float64) VectOp {
-	return s.ApplyOp(func(val float64) float64 { return math.Pow(val, value) })
+	return fs.Powl(s, value)
 }
 
 // -> s'[i] = s[i] ^ o(i)
 func (s VectOp) PowOp(o fs.IndexedFunc) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return math.Pow(val, o(i)) })
+	return fs.PowOp(s, o)
 }
 
 // -> s'[i] = s[i] ^ o(i, s[i])
 func (s VectOp) PowOpi(o fs.IndexedOperator) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return math.Pow(val, o(i, val)) })
+	return fs.PowOpi(s, o)
 }
 
 /////////////////
@@ -227,23 +195,22 @@ func (s VectOp) PowOpi(o fs.IndexedOperator) VectOp {
 /////////////////
 // -> s'[i] = max(s[i], v[i])
 func (s VectOp) Maxv(v []float64) VectOp {
-	s.accept(v)
-	return s.MaxOp(fs.Get(v))
+	return fs.Maxv(s, v)
 }
 
 // -> s'[i] = max(s[i], value)
 func (s VectOp) Maxl(value float64) VectOp {
-	return s.ApplyOp(func(val float64) float64 { return math.Max(val, value) })
+	return fs.Maxl(s, value)
 }
 
 // -> s'[i] = max(s[i], o(i))
 func (s VectOp) MaxOp(o fs.IndexedFunc) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return math.Max(val, o(i)) })
+	return fs.MaxOp(s, o)
 }
 
 // -> s'[i] = max(s[i], o(i, s[i]))
 func (s VectOp) MaxOpi(o fs.IndexedOperator) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return math.Max(val, o(i, val)) })
+	return fs.MaxOpi(s, o)
 }
 
 /////////////////
@@ -251,23 +218,22 @@ func (s VectOp) MaxOpi(o fs.IndexedOperator) VectOp {
 /////////////////
 // -> s'[i] = min(s[i], v[i])
 func (s VectOp) Minv(v []float64) VectOp {
-	s.accept(v)
-	return s.MinOp(fs.Get(v))
+	return fs.Minv(s, v)
 }
 
 // -> s'[i] = min(s[i], value)
 func (s VectOp) Minl(value float64) VectOp {
-	return s.ApplyOp(func(val float64) float64 { return math.Min(val, value) })
+	return fs.Minl(s, value)
 }
 
 // -> s'[i] = min(s[i], o(i))
 func (s VectOp) MinOp(o fs.IndexedFunc) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return math.Min(val, o(i)) })
+	return fs.MinOp(s, o)
 }
 
 // -> s'[i] = min(s[i], o(i, s[i]))
 func (s VectOp) MinOpi(o fs.IndexedOperator) VectOp {
-	return s.ApplyOpi(func(i int, val float64) float64 { return math.Min(val, o(i, val)) })
+	return fs.MinOpi(s, o)
 }
 
 ///////////////////////////
@@ -275,48 +241,42 @@ func (s VectOp) MinOpi(o fs.IndexedOperator) VectOp {
 ///////////////////////////
 
 func (s VectOp) Rev() VectOp {
-	size := len(s)
-	for i := 0; i < size/2; i++ {
-		tmp := s[i]
-		s[i] = s[size-i-1]
-		s[size-i-1] = tmp
-	}
-	return s
+	return fs.Rev(s)
 }
 
 // -> s'[i] = -s[i]
 func (s VectOp) Neg() VectOp {
-	return s.ApplyOp(fs.Neg)
+	return fs.Negv(s)
 }
 
 // -> s'[i] = abs(s[i])
 func (s VectOp) Abs() VectOp {
-	return s.ApplyOp(math.Abs)
+	return fs.Abs(s)
 }
 
 // -> s'[i] = value / s[i]
 func (s VectOp) Idivl(value float64) VectOp {
-	return s.ApplyOp(func(val float64) float64 { return value / val })
+	return fs.Idivl(s, value)
 }
 
 // -> s'[i] = 1 / s[i]
 func (s VectOp) Inv() VectOp {
-	return s.Idivl(1)
+	return fs.Idivl(s, 1)
 }
 
 // -> s'[i] = log(s[i])
 func (s VectOp) Log() VectOp {
-	return s.ApplyOp(math.Log)
+	return fs.Log(s)
 }
 
 // -> s'[i] = exp(s[i])
 func (s VectOp) Exp() VectOp {
-	return s.ApplyOp(math.Exp)
+	return fs.Exp(s)
 }
 
 // -> s'[i] = value ^ s[i]
 func (s VectOp) Expl(value float64) VectOp {
-	return s.ApplyOp(func(val float64) float64 { return math.Pow(value, val) })
+	return fs.Expl(s, value)
 }
 
 ///////////////////////////
@@ -387,7 +347,11 @@ func (s VectOp) Reduce(f fs.ReduceOperator, identity float64) float64 {
 
 // -> sum(s[i])
 func (s VectOp) Sum() float64 {
-	return s.Reduce(fs.Plus, 0)
+	sum := 0.0
+	for _, val := range s {
+		sum += val
+	}
+	return sum
 }
 
 // -> s.v
@@ -402,12 +366,20 @@ func (s VectOp) Dot(v []float64) float64 {
 
 // -> max(s[i]), -inf if empty
 func (s VectOp) Max() float64 {
-	return s.Reduce(math.Max, math.Inf(-1))
+	max := math.Inf(-1)
+	for _, val := range s {
+		max = math.Max(max, val)
+	}
+	return max
 }
 
 // -> min(s[i]), +inf if empty
 func (s VectOp) Min() float64 {
-	return s.Reduce(math.Min, math.Inf(+1))
+	min := math.Inf(+1)
+	for _, val := range s {
+		min = math.Min(min, val)
+	}
+	return min
 }
 
 // -> c(s[i])...
