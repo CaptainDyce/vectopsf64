@@ -26,7 +26,7 @@ func OnConst(value float64, size int) VectOp {
 }
 
 func OnIdent(size int) VectOp {
-	return OnSize(size).Apply(fs.CoerceInt)
+	return OnSize(size).Ident()
 }
 
 func OnInts(values []int) VectOp {
@@ -56,6 +56,10 @@ func (s VectOp) ApplyOpi(f fs.IndexedOperator) VectOp {
 		s[i] = f(i, val)
 	}
 	return s
+}
+
+func (s VectOp) Ident() VectOp {
+	return s.Apply(fs.CoerceInt)
 }
 
 func (s VectOp) Setl(value float64) VectOp {
@@ -270,6 +274,16 @@ func (s VectOp) MinOpi(o fs.IndexedOperator) VectOp {
 // misc...
 ///////////////////////////
 
+func (s VectOp) Rev() VectOp {
+	size := len(s)
+	for i := 0; i < size/2; i++ {
+		tmp := s[i]
+		s[i] = s[size-i-1]
+		s[size-i-1] = tmp
+	}
+	return s
+}
+
 // -> s'[i] = -s[i]
 func (s VectOp) Neg() VectOp {
 	return s.ApplyOp(fs.Neg)
@@ -357,6 +371,11 @@ func (s VectOp) IndexesOf(p fs.Predicate) []int {
 	return indexes
 }
 
+// -> s[last]
+func (s VectOp) Last() float64 {
+	return s[len(s)-1]
+}
+
 // -> f[v[n - 1], ... f[v[2], f[v[1], f[v[0], identity]]]]
 func (s VectOp) Reduce(f fs.ReduceOperator, identity float64) float64 {
 	result := identity
@@ -379,11 +398,6 @@ func (s VectOp) Dot(v []float64) float64 {
 		sum += val * v[i]
 	}
 	return sum
-}
-
-// -> s[last]
-func (s VectOp) Last() float64 {
-	return s[len(s)-1]
 }
 
 // -> max(s[i]), -inf if empty
